@@ -4,6 +4,6 @@ description: A Slimefun4 addon that adds a variety of runes and nether-related m
 main: ga.kirzu.infernalexpansion.InfernalExpansion
 website: https://github.com/wickidcow/SF_InfernalExpansion
 version: ${project.version}
-api-version: '26.2'
+api-version: '1.21.11'
 depend:
   - Slimefun
