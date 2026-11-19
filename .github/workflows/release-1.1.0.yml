@@ -1,0 +1,84 @@
+name: Publish verified SF Infernal Expansion 1.1.0
+
+on:
+  workflow_run:
+    workflows: ["Build SF Infernal Expansion"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check version and source on exact successful main commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v1.1.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "v1.1.0 already published; immutable release will not be changed."
+            echo "SKIP_RELEASE=true" >> "$GITHUB_ENV"
+          else
+            echo "SKIP_RELEASE=false" >> "$GITHUB_ENV"
+          fi
+          git init -q verified-source
+          cd verified-source
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git fetch -q --depth 1 origin "$SOURCE_SHA"
+          git checkout -q --detach "$SOURCE_SHA"
+          grep -Fq '<version>1.1.0</version>' pom.xml
+          grep -Fq '<maven.compiler.release>21</maven.compiler.release>' pom.xml
+          grep -Fq "api-version: '1.21.11'" src/main/resources/plugin.yml
+
+      - name: Retrieve Java 21 JAR from successful source-pinned workflow
+        if: env.SKIP_RELEASE != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name "SF_InfernalExpansion-1.1.0" --dir dist
+          test -s dist/SF_InfernalExpansion1.1.0.jar
+          jar tf dist/SF_InfernalExpansion1.1.0.jar | grep -Fxq plugin.yml
+          javap -verbose -classpath dist/SF_InfernalExpansion1.1.0.jar \
+            ga.kirzu.infernalexpansion.InfernalExpansion | grep -Fq 'major version: 65'
+          sha256sum dist/SF_InfernalExpansion1.1.0.jar
+
+      - name: Publish exact successful raw JAR as an immutable test release
+        if: env.SKIP_RELEASE != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > release-notes.md <<'NOTES'
+          ## SF Infernal Expansion 1.1.0
+          **Java 21 bytecode · Slimefun Legacy 4.1.81 · Paper 1.21.11/26.3 compatibility build**
+
+          First numbered release for the maintained Slimefun Legacy addon ZIP.
+          - English-language item names, descriptions and messages
+          - Original item IDs and recipes retained; original Kirzu/NotKirzu MIT attribution preserved
+          - No GhuizanLib runtime dependency
+          - Thermal Walk uses a distinct data key instead of Slimefun's soulbound marker
+          - Piglin Talisman and Ender-infused detection use public Slimefun APIs
+          - Updated potion effect names and Thermal Walk scheduling guard
+          - Java 21 compatible bytecode compiled against Paper 1.21.11, tested for startup with Slimefun Legacy 4.1.81 on Paper 26.3
+
+          Automated build/startup checks do not certify all gameplay mechanics or Folia region safety.
+          This is a test release; deploy to a backed-up test server first.
+          NOTES
+          gh release create v1.1.0 dist/SF_InfernalExpansion1.1.0.jar \
+            --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" \
+            --title 'SF Infernal Expansion 1.1.0 (Compatibility Test Release)' \
+            --notes-file release-notes.md --prerelease
