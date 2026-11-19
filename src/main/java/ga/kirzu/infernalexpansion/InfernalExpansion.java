@@ -42,6 +42,6 @@ public class InfernalExpansion extends JavaPlugin implements SlimefunAddon {
 
     @Override
     public String getBugTrackerURL() {
-        return "https://github.com/NotKirzu/InfernalExpansion/issues";
+        return "https://github.com/wickidcow/SF_InfernalExpansion/issues";
     }
 }

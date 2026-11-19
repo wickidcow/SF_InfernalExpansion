@@ -25,7 +25,7 @@ public class ThermalWalkTask implements Runnable {
     public void run() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!player.isValid() || player.isDead()) {
-                return;
+                continue;
             }
 
             ItemStack boots = player.getInventory().getBoots();
