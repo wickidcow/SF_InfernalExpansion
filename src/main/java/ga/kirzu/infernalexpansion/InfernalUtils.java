@@ -1,6 +1,6 @@
 package ga.kirzu.infernalexpansion;
 
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import net.kyori.adventure.text.format.NamedTextColor;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.config.Config;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
@@ -18,7 +18,13 @@ import java.util.logging.Logger;
 
 public class InfernalUtils {
 
-    public static String THERMAL_WALK_LORE = ChatColor.GRAY + "Thermal Walk I";
+    public static final String THERMAL_WALK_LORE = ChatColor.GRAY + "Thermal Walk I";
+    private static final Component THERMAL_WALK_DISPLAY = Component.text("Thermal Walk I", NamedTextColor.GRAY);
+
+    private static NamespacedKey thermalWalkKey() {
+        // Never use Slimefun's soulbound marker: it falsely enchants soulbound boots.
+        return new NamespacedKey(InfernalExpansion.getInstance(), "thermal_walk");
+    }
 
     public static void log(String message, Class<?> clazz) {
         Logger logger = Logger.getLogger("InfernalExpansion");
@@ -64,7 +70,7 @@ public class InfernalUtils {
         ItemMeta meta = item.getItemMeta();
 
         PersistentDataContainer container = meta.getPersistentDataContainer();
-        NamespacedKey key = Slimefun.getRegistry().getSoulboundDataKey();
+        NamespacedKey key = thermalWalkKey();
 
         if (addEnchantment && !hasThermalWalk) {
             container.set(key, PersistentDataType.BYTE, (byte) 1);
@@ -74,17 +80,16 @@ public class InfernalUtils {
             container.remove(key);
         }
 
-        List<Component> lore = meta.lore();
-        if (lore == null) {
-            lore = new ArrayList<>();
-        }
+        List<Component> lore = meta.lore() == null ? new ArrayList<>() : new ArrayList<>(meta.lore());
 
         if (addEnchantment && !hasThermalWalk) {
-            lore.add(Component.text(THERMAL_WALK_LORE));
+            lore.add(THERMAL_WALK_DISPLAY);
         }
 
         if (!addEnchantment && hasThermalWalk) {
+            // Old rune items used legacy formatting codes as literal component text.
             lore.remove(Component.text(THERMAL_WALK_LORE));
+            lore.remove(THERMAL_WALK_DISPLAY);
         }
 
         meta.lore(lore);
@@ -101,7 +106,8 @@ public class InfernalUtils {
 
             if (meta != null) {
                 List<Component> lore = meta.lore();
-                return lore != null && lore.contains(Component.text(THERMAL_WALK_LORE));
+                return lore != null && (lore.contains(Component.text(THERMAL_WALK_LORE))
+                        || lore.contains(THERMAL_WALK_DISPLAY));
             }
 
         }
@@ -112,7 +118,7 @@ public class InfernalUtils {
     private static boolean hasThermalWalkFlag(ItemMeta meta) {
         if (meta != null) {
             PersistentDataContainer container = meta.getPersistentDataContainer();
-            NamespacedKey key = Slimefun.getRegistry().getSoulboundDataKey();
+            NamespacedKey key = thermalWalkKey();
 
             return container.has(key, PersistentDataType.BYTE);
         }
