@@ -44,17 +44,18 @@ jobs:
             -Dpackaging=jar \
             -DgeneratePom=true
 
-      - name: Compile against Paper 26.3
+      - name: Compile Java 21 distributable against Paper 1.21.11
         run: mvn --batch-mode --no-transfer-progress clean verify
 
-      - name: Inspect standalone plugin JAR
+      - name: Inspect standalone Java 21 plugin JAR
         shell: bash
         run: |
           set -euo pipefail
-          JAR="target/SF_InfernalExpansion1.1.0-beta.1.jar"
+          JAR="target/SF_InfernalExpansion1.1.0.jar"
           test -s "$JAR"
           jar tf "$JAR" | grep -qx "plugin.yml"
           jar tf "$JAR" | grep -qx "ga/kirzu/infernalexpansion/InfernalExpansion.class"
+          javap -verbose -classpath "$JAR" ga.kirzu.infernalexpansion.InfernalExpansion | grep -Fq "major version: 65"
           if jar tf "$JAR" | grep -Eq '^io/github/thebusybiscuit/slimefun4/|^org/bukkit/'; then
             echo "Provided Slimefun/Paper dependencies leaked into the addon JAR" >&2
             exit 1
@@ -65,8 +66,8 @@ jobs:
       - name: Upload raw build JAR for testing
         uses: actions/upload-artifact@v4
         with:
-          name: SF_InfernalExpansion-1.1.0-beta.1
-          path: target/SF_InfernalExpansion1.1.0-beta.1.jar
+          name: SF_InfernalExpansion-1.1.0
+          path: target/SF_InfernalExpansion1.1.0.jar
           if-no-files-found: error
 
 
@@ -85,7 +86,7 @@ jobs:
       - name: Download compiled addon
         uses: actions/download-artifact@v4
         with:
-          name: SF_InfernalExpansion-1.1.0-beta.1
+          name: SF_InfernalExpansion-1.1.0
           path: runtime/plugins
 
       - name: Download verified Slimefun Legacy release
