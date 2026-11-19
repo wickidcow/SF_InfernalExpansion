@@ -1,0 +1,68 @@
+name: Publish verified Infernal Expansion beta
+
+on:
+  workflow_run:
+    workflows: ["Build SF Infernal Expansion"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  release-beta:
+    # Only publish a fully verified build from this repository's main branch.
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the raw, verified Java JAR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name "SF_InfernalExpansion-1.1.0-beta.1" --dir dist
+          test -s "dist/SF_InfernalExpansion1.1.0-beta.1.jar"
+          sha256sum dist/SF_InfernalExpansion1.1.0-beta.1.jar
+
+      - name: Publish prerelease with individual JAR asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="v1.1.0-beta.1"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Beta release $TAG already exists; leaving assets unchanged."
+            exit 0
+          fi
+          cat > release-notes.md <<'RELEASE_NOTES'
+          ## Infernal Expansion 1.1.0 beta 1
+
+          Initial Slimefun Legacy / Paper 26.3 compatibility prerelease.
+
+          - Translated Chinese item names, lore, and messages to English
+          - Built with Java 25 against Paper 26.3 and Slimefun Legacy 4.1.81
+          - No separate GhuizanLib dependency
+          - Fixed obsolete nausea potion effect API
+          - Fixed Thermal Walk marking soulbound items incorrectly; accepts historical rune lore
+          - Fixed Piglin Talisman and Ender-infused detection using public Slimefun APIs
+          - Fixed Thermal Walk task skipping other online players
+          - Retained all original Slimefun IDs and crafting recipes
+
+          CI verified Maven compilation, standalone plugin JAR contents, and actual startup alongside Slimefun Legacy on Paper 26.3. This beta still requires gameplay testing of all mechanics on a test server. Folia compatibility has not been certified.
+
+          Original author: Kiirzu / NotKirzu (MIT license).
+          RELEASE_NOTES
+          gh release create "$TAG" \
+            "dist/SF_InfernalExpansion1.1.0-beta.1.jar" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$SOURCE_SHA" \
+            --title "SF Infernal Expansion 1.1.0 Beta 1" \
+            --notes-file release-notes.md \
+            --prerelease
