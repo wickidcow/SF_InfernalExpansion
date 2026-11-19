@@ -51,7 +51,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          JAR="target/SF_InfernalExpansion1.1.0-SNAPSHOT.jar"
+          JAR="target/SF_InfernalExpansion1.1.0-beta.1.jar"
           test -s "$JAR"
           jar tf "$JAR" | grep -qx "plugin.yml"
           jar tf "$JAR" | grep -qx "ga/kirzu/infernalexpansion/InfernalExpansion.class"
@@ -65,8 +65,8 @@ jobs:
       - name: Upload raw build JAR for testing
         uses: actions/upload-artifact@v4
         with:
-          name: SF_InfernalExpansion-1.1.0-SNAPSHOT
-          path: target/SF_InfernalExpansion1.1.0-SNAPSHOT.jar
+          name: SF_InfernalExpansion-1.1.0-beta.1
+          path: target/SF_InfernalExpansion1.1.0-beta.1.jar
           if-no-files-found: error
 
 
@@ -85,7 +85,7 @@ jobs:
       - name: Download compiled addon
         uses: actions/download-artifact@v4
         with:
-          name: SF_InfernalExpansion-1.1.0-SNAPSHOT
+          name: SF_InfernalExpansion-1.1.0-beta.1
           path: runtime/plugins
 
       - name: Download verified Slimefun Legacy release
