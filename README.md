@@ -48,22 +48,22 @@ Existing Slimefun item IDs and crafting recipes are preserved from the original 
 
 ## 📦 Downloads & requirements
 
-**Latest published test release:** [SF Infernal Expansion v1.1.0-beta.1](https://github.com/wickidcow/SF_InfernalExpansion/releases/tag/v1.1.0-beta.1).
+**Maintained compatibility build:** [SF Infernal Expansion v1.1.0](https://github.com/wickidcow/SF_InfernalExpansion/releases/tag/v1.1.0) (test release; gameplay verification still required).
 
 | Requirement | Verified or documented target |
 | --- | --- |
-| **Minecraft server** | Paper 26.3; startup smoke-tested on Paper 26.3 build 255 |
-| **Java** | Java 25 |
+| **Minecraft server** | Paper 1.21.11 API baseline, with Paper 26.3 / Slimefun Legacy 4.1.81 startup smoke coverage |
+| **Java** | Java 21 bytecode; Java 25 is used by the Paper 26.3 build/test runner |
 | **Slimefun** | [Slimefun Legacy 4.1.81](https://github.com/wickidcow/Slimefun-Legacy/releases/tag/v4.1.81) |
 | **GhuizanLib / GuizhanLibPlugin** | **Not required** by this addon |
-| **Paper 26.2 / Purpur / Folia** | Not yet separately runtime-certified |
+| **Paper 26.2 / Purpur / Folia** | Not separately runtime-certified; Folia region-thread safety is not claimed |
 
 The beta has passed compilation and a real Paper/Slimefun Legacy server startup test. **A successful startup does not guarantee that every gameplay feature is fully tested.** Test the addon in a backed-up server environment before production deployment.
 
-[Download the standalone beta JAR](https://github.com/wickidcow/SF_InfernalExpansion/releases/download/v1.1.0-beta.1/SF_InfernalExpansion1.1.0-beta.1.jar).
+[Download the maintained Java 21 JAR](https://github.com/wickidcow/SF_InfernalExpansion/releases/download/v1.1.0/SF_InfernalExpansion1.1.0.jar). The previous [1.1.0 beta](https://github.com/wickidcow/SF_InfernalExpansion/releases/tag/v1.1.0-beta.1) remains available for historical testing.
 
 > [!WARNING]
-> Back up your server, worlds, and Slimefun data before changing addon versions. Do not use `/reload` to install or upgrade Slimefun plugins. This is a beta release.
+> Back up your server, worlds, and Slimefun data before changing addon versions. Do not use `/reload` to install or upgrade Slimefun plugins. This remains a compatibility test release; validate in staging first.
 
 ---
 
@@ -83,7 +83,7 @@ No separate GhuizanLib installation is needed. Slimefun and Paper are provided b
 ## 🛠️ What this maintained fork changes
 
 - **English-first content:** Translated the original Chinese names, item lore, and player-facing messages.
-- **Modern compatibility:** Builds using Java 25, Paper 26.3 APIs, and Slimefun Legacy 4.1.81.
+- **Modern compatibility:** Compiles Java 21 bytecode against the Paper 1.21.11 baseline and checks startup against Slimefun Legacy 4.1.81 on Paper 26.3.
 - **Independent Thermal Walk metadata:** Avoids using Slimefun's soulbound marker; recognizes historical Thermal Walk lore.
 - **Piglin Talisman maintenance:** Uses supported public Slimefun lookups for standard and Ender-infused variants instead of private-method reflection.
 - **Correctness improvements:** Updates renamed potion effects and avoids skipping other players during the Thermal Walk task.
