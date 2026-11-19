@@ -1,4 +1,4 @@
-# 下界工艺
+# Infernal Expansion
 
 ##  A Slimefun4 addon that adds a variety of nether related stuff.
 
@@ -9,6 +9,8 @@
 **Java 17** <br>
 **Paper 1.18** <br>
 **[Slimefun RC-31](https://github.com/Slimefun/Slimefun4/releases/tag/RC-31)**
+
+GhuizanLib is not required by this addon. Only Slimefun is declared as a plugin dependency.
 
 ### Support, Bugs or Suggestions
 * Create an issue [here](https://github.com/NotKirzu/InfernalExpansion/issues/new)
