@@ -2,8 +2,8 @@ name: InfernalExpansion
 author: Kiirzu
 description: A Slimefun4 addon that adds a variety of runes and nether-related mechanics.
 main: ga.kirzu.infernalexpansion.InfernalExpansion
-website: https://github.com/NotKirzu/InfernalExpansion
+website: https://github.com/wickidcow/SF_InfernalExpansion
 version: ${project.version}
-api-version: 1.16
+api-version: '26.2'
 depend:
   - Slimefun
